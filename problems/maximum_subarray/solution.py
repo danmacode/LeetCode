@@ -1,21 +1,29 @@
 class Solution:
     def maxSubArray(self, nums: List[int]) -> int:
-        """the O(n) solution is the easiest, with
-        the divide-n-conquer being more subtle""" 
-        
-        n = len(nums)
-        i1, i2, = 0, 0
-        curr_sum, max_sum = 0, -10**4
-        # O(n) Time approach
-        for i, e in enumerate(nums):
-            # start subarray if we reach negative nums
-            if curr_sum <= 0: 
-                curr_sum = e  
-                i0 = i # subarray start
-            else:             # add element
-                curr_sum += e
-                
-            if curr_sum > max_sum:
-                max_sum = curr_sum
-                i1, i2 = i0, i + 1
-        return max_sum # sum(nums[i1:i2])
+        """The O(n) aproach was easier, this is a subsequent exercise
+        using the divide-and-conquer approach...
+        T(n) = 2T(n/2) + O(n) -> O(n) = O(nlogn)"""
+
+        @staticmethod
+        def _maxSubArray(arr: List[int], i_left: int, i_right: int) -> int:
+            """We redo the function to be able to use recurrence"""
+            if i_left > i_right:
+                return -inf
+            mid: int = (i_left + i_right) // 2  # floor division returns int
+            # iterate over n/2
+            left_sum, cur_sum = 0, 0
+            for i in range(mid - 1, i_left - 1, -1):
+                left_sum = max(left_sum, cur_sum := cur_sum + arr[i])
+            # iterate right over n/2
+            cur_sum, right_sum = 0, 0
+            for e in arr[mid + 1:i_right + 1]:
+                right_sum = max(right_sum, cur_sum := cur_sum + e)
+
+            return max(
+                _maxSubArray(arr, i_left, mid - 1),
+                _maxSubArray(arr, mid + 1, i_right),
+                left_sum + arr[mid] + right_sum,
+            )
+
+        # use recurrence until we get the max subarray sum
+        return _maxSubArray(nums, 0, len(nums) - 1)
